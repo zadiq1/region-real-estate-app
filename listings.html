@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Property Listings | DreamSpace Real Estate</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1 class="logo">DreamSpace</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="listings.html">Properties</a></li>
+          <li><a href="construction.html">Construction</a></li>
+          <li><a href="management.html">Management</a></li>
+          <li><a href="store.html">Materials Store</a></li>
+          <li><a href="consulting.html">Consulting</a></li>
+          <li><a href="notary.html">Notary</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2 style="margin: 2rem 0;">Browse Properties</h2>
+
+    <!-- Filters -->
+    <div style="margin-bottom: 2rem;">
+      <label for="type">Type:</label>
+      <select id="type">
+        <option>All</option>
+        <option>House</option>
+        <option>Land</option>
+        <option>Commercial</option>
+      </select>
+
+      <label for="status">Status:</label>
+      <select id="status">
+        <option>All</option>
+        <option>For Sale</option>
+        <option>For Rent</option>
+      </select>
+    </div>
+
+    <!-- Property Grid -->
+    <div class="listings-container">
+      <!-- Property 1 -->
+      <div class="property-card">
+        <img src="https://source.unsplash.com/400x300/?house,1" alt="Property 1" />
+        <div class="property-card-content">
+          <h3>Modern 3-Bedroom Home</h3>
+          <p>Located in a quiet suburb with schools nearby. Spacious and elegant design.</p>
+          <strong>$350,000</strong>
+          <br><br>
+          <a href="#">View Details</a>
+        </div>
+      </div>
+
+      <!-- Property 2 -->
+      <div class="property-card">
+        <img src="https://source.unsplash.com/400x300/?land,real-estate" alt="Property 2" />
+        <div class="property-card-content">
+          <h3>2-Acre Land Parcel</h3>
+          <p>Perfect for farming or a countryside villa. Utilities accessible.</p>
+          <strong>$120,000</strong>
+          <br><br>
+          <a href="#">View Details</a>
+        </div>
+      </div>
+
+      <!-- Property 3 -->
+      <div class="property-card">
+        <img src="https://source.unsplash.com/400x300/?apartment" alt="Property 3" />
+        <div class="property-card-content">
+          <h3>Downtown Apartment</h3>
+          <p>2-bedroom apartment in the heart of the city. Close to shopping and dining.</p>
+          <strong>$1,200/mo</strong>
+          <br><br>
+          <a href="#">View Details</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
