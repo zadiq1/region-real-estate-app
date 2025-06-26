@@ -1,3 +1,10 @@
+.cart-ui {
+  color: white;
+  font-weight: bold;
+  margin-left: 1rem;
+}
+
+
 :root {
   --primary: #1d3557;
   --accent: #e63946;
