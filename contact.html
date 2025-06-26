@@ -1,47 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<html lang="en"><head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Contact Us | DreamSpace</title>
   <link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
-  <header>
-    <div class="container">
-      <h1 class="logo">DreamSpace</h1>
-      <nav>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="listings.html">Properties</a></li>
-          <li><a href="construction.html">Construction</a></li>
-          <li><a href="management.html">Management</a></li>
-          <li><a href="store.html">Materials Store</a></li>
-          <li><a href="consulting.html">Consulting</a></li>
-          <li><a href="notary.html">Notary</a></li>
-          <li><a href="contact.html" class="active">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
+</head><body>
+  <header>…</header>
 
   <main class="container">
-    <h2 style="margin: 2rem 0;">Get in Touch</h2>
-    <p>Whether you’re looking to buy, rent, manage a property or just have questions—drop us a note below.</p>
-
-    <form style="max-width:600px;margin: auto;display:flex;flex-direction:column;gap:1rem;">
-      <input type="text" placeholder="Full Name" required />
-      <input type="email" placeholder="Email Address" required />
-      <input type="text" placeholder="Subject" required />
-      <textarea placeholder="Your Message" rows="5" required></textarea>
+    <h2>Get in Touch</h2>
+    <form id="contact-form" style="…">
+      <input name="user_name" type="text" placeholder="Full Name" required />
+      <input name="user_email" type="email" placeholder="Email Address" required />
+      <input name="subject" type="text" placeholder="Subject" required />
+      <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
       <button type="submit" class="cta-button">Send Message</button>
     </form>
+    <p id="contact-message" style="display:none; margin-top:1rem;"></p>
+
+    <div style="text-align:center; margin-top:2rem;">
+      <p><strong>Prefer Chat?</strong></p>
+      <a href="tel:+1234567890">📞 +1 (234) 567‑890</a><br>
+      <a href="https://wa.me/1234567890" target="_blank">💬 Chat on WhatsApp</a>
+    </div>
   </main>
 
-  <footer>
-    <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
-  </footer>
+  <footer>…</footer>
 
-  <script src="js/main.js"></script>
-</body>
-</html>
+  <script src="https://cdn.emailjs.com/sdk/2.3.2/email.min.js"></script>
+  <script>
+    emailjs.init("YOUR_EMAILJS_USER_ID");
+    document.getElementById("contact-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      emailjs.sendForm("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", this)
+        .then(() => {
+          document.getElementById("contact-message").textContent = "✅ Message sent!";
+          document.getElementById("contact-message").style.color = "green";
+          this.reset();
+        }, () => {
+          document.getElementById("contact-message").textContent = "❌ Failed to send.";
+          document.getElementById("contact-message").style.color = "red";
+        });
+    });
+  </script>
+</body></html>
