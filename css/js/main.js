@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DreamSpace Real Estate loaded 🏠");
+  console.log("Region Real Estate loaded 🏠");
 
   // LISTINGS FILTER LOGIC (previous code)...
 
