@@ -1,14 +1,22 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Materials Store | DreamSpace</title>
   <link rel="stylesheet" href="css/style.css" />
-</head><body>
+</head>
+<body>
   <header>
-    <div class="container">
+    <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
       <h1 class="logo">DreamSpace</h1>
-      <nav>…</nav>
-
+      <nav>
+        <ul style="list-style:none; display:flex; gap:1rem;">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="listings.html">Listings</a></li>
+          <li><a href="store.html" class="active">Store</a></li>
+        </ul>
+      </nav>
       <div class="cart-ui">
         🛒 <span id="cart-count">0</span> items
         <button id="cart-toggle">View Cart</button>
@@ -16,13 +24,43 @@
     </div>
   </header>
 
+  <!-- Cart Sidebar -->
   <div id="cart-sidebar" class="cart-sidebar">
     <h3>Your Cart</h3>
     <ul id="cart-items"></ul>
     <button id="cart-close">Close</button>
   </div>
 
-  <main class="container">…</main>
-  <footer>…</footer>
+  <!-- Product Grid -->
+  <main class="container">
+    <h2 style="margin: 2rem 0;">Buy Building Materials</h2>
+    <div class="listings-container">
+      <div class="property-card">
+        <img src="https://source.unsplash.com/400x300/?cement" alt="Cement" />
+        <div class="property-card-content">
+          <h3>Premium Cement</h3>
+          <p>50kg high-performance cement for all constructions.</p>
+          <strong>$12.99</strong><br><br>
+          <a href="#">Add to Cart</a>
+        </div>
+      </div>
+
+      <div class="property-card">
+        <img src="https://source.unsplash.com/400x300/?bricks" alt="Bricks" />
+        <div class="property-card-content">
+          <h3>Red Clay Bricks</h3>
+          <p>100 bricks per pallet. Strong and traditional.</p>
+          <strong>$75.00</strong><br><br>
+          <a href="#">Add to Cart</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p style="text-align:center;">© 2025 DreamSpace Real Estate. All rights reserved.</p>
+  </footer>
+
   <script src="js/main.js"></script>
-</body></html>
+</body>
+</html>
