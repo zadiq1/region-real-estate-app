@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("Real Estate App Loaded ✅");
+  console.log("🚀 DreamSpace System Loaded");
 
-  // FILTER SYSTEM
+  // ========= LISTINGS FILTER ========= //
   const typeSelect = document.getElementById("type");
   const statusSelect = document.getElementById("status");
   const minPriceInput = document.getElementById("minPrice");
@@ -19,19 +19,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const status = card.getAttribute("data-status");
       const price = parseFloat(card.getAttribute("data-price")) || 0;
 
-      const matchType = (selectedType === "all" || selectedType === type);
-      const matchStatus = (selectedStatus === "all" || selectedStatus === status);
-      const matchPrice = (price >= minPrice && price <= maxPrice);
+      const matchType = selectedType === "all" || selectedType === type;
+      const matchStatus = selectedStatus === "all" || selectedStatus === status;
+      const matchPrice = price >= minPrice && price <= maxPrice;
 
       card.style.display = (matchType && matchStatus && matchPrice) ? "block" : "none";
     });
   }
 
   [typeSelect, statusSelect, minPriceInput, maxPriceInput].forEach(el => {
-    if (el) el.addEventListener("input", filterListings);
+    el?.addEventListener("input", filterListings);
   });
 
-  // CART SYSTEM
+  // ========= MOBILE NAVIGATION ========= //
+  const menuToggle = document.getElementById("menu-toggle");
+  const nav = document.getElementById("main-nav");
+
+  menuToggle?.addEventListener("click", () => {
+    nav.classList.toggle("mobile-hidden");
+  });
+
+  // ========= CART SYSTEM ========= //
   const cartCount = document.getElementById("cart-count");
   const cartItemsList = document.getElementById("cart-items");
   const cartToggle = document.getElementById("cart-toggle");
@@ -66,30 +74,90 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  document.querySelectorAll('.property-card a').forEach(btn => {
-    btn.addEventListener('click', e => {
+  document.querySelectorAll(".property-card a").forEach(btn => {
+    btn.addEventListener("click", e => {
       e.preventDefault();
-      const card = e.target.closest('.property-card');
-      const name = card.querySelector('h3')?.textContent || "Unknown Item";
+      const card = e.target.closest(".property-card");
+      const name = card.querySelector("h3")?.textContent || "Item";
 
-      if (cart[name]) {
-        cart[name]++;
-      } else {
-        cart[name] = 1;
-      }
-
+      cart[name] = (cart[name] || 0) + 1;
       updateCartUI();
       alert(`🛒 "${name}" added to cart!`);
     });
   });
 
-  cartToggle?.addEventListener('click', () => {
-    cartSidebar.style.right = '0';
+  cartToggle?.addEventListener("click", () => {
+    cartSidebar.style.right = "0";
   });
 
-  cartClose?.addEventListener('click', () => {
-    cartSidebar.style.right = '-100%';
+  cartClose?.addEventListener("click", () => {
+    cartSidebar.style.right = "-100%";
   });
 
   updateCartUI();
+
+  // ========= BLOG / CONSULTING ARTICLES ========= //
+  const blogList = document.getElementById("blog-list");
+  const categoryFilter = document.getElementById("categoryFilter");
+  const modal = document.getElementById("blog-modal");
+  const modalTitle = document.getElementById("modal-title");
+  const modalBody = document.getElementById("modal-body");
+  const modalClose = document.getElementById("modal-close");
+
+  let articles = [];
+
+  if (blogList) {
+    fetch("data/articles.json")
+      .then(res => res.json())
+      .then(data => {
+        articles = data;
+        renderArticles("all");
+      });
+
+    categoryFilter?.addEventListener("change", () => {
+      const cat = categoryFilter.value;
+      renderArticles(cat);
+    });
+
+    function renderArticles(category) {
+      blogList.innerHTML = "";
+
+      articles.filter(article => {
+        return category === "all" || article.category === category;
+      }).forEach(article => {
+        const div = document.createElement("div");
+        div.className = "property-card";
+        div.innerHTML = `
+          <img src="${article.image}" alt="${article.title}" />
+          <div class="property-card-content">
+            <h3>${article.title}</h3>
+            <p>${article.intro}</p>
+            <a href="#" class="read-more" data-title="${article.title}">Read More</a>
+          </div>
+        `;
+        blogList.appendChild(div);
+      });
+
+      document.querySelectorAll(".read-more").forEach(link => {
+        link.addEventListener("click", e => {
+          e.preventDefault();
+          const title = link.getAttribute("data-title");
+          const article = articles.find(a => a.title === title);
+          modalTitle.textContent = article.title;
+          modalBody.textContent = article.content;
+          modal.style.display = "block";
+        });
+      });
+    }
+
+    modalClose?.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  }
 });
