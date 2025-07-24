@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Top 5 Tips Before Buying Land",
+    "category": "Tips",
+    "image": "https://source.unsplash.com/400x300/?land",
+    "intro": "Legal checks, documents, permits... here's what to know.",
+    "content": "Before you buy land, always verify title deeds, zoning rules, and accessibility. Ensure there's no pending litigation..."
+  },
+  {
+    "title": "Managing a Construction Project",
+    "category": "Construction",
+    "image": "https://source.unsplash.com/400x300/?construction",
+    "intro": "Timeline, contractors, quality control: simplified guide.",
+    "content": "Construction success comes from planning, scheduling, quality control and reliable suppliers..."
+  },
+  {
+    "title": "Notary Services for Buyers",
+    "category": "Legal",
+    "image": "https://source.unsplash.com/400x300/?notary",
+    "intro": "How public notary helps validate your real estate deals.",
+    "content": "Notary confirms ownership, signs off on legal documents, and safeguards your investment..."
+  }
+]
