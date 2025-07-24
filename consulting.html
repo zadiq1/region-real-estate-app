@@ -40,17 +40,29 @@
     </div>
   </header>
 
-  <main class="container">
-    <h2 style="margin: 2rem 0;">Latest Consulting Articles</h2>
-    <div class="listings-container">
-      <div class="property-card">
-        <img src="https://source.unsplash.com/400x300/?architecture" alt="Article 1" />
-        <div class="property-card-content">
-          <h3>Top 5 Tips Before Buying Land</h3>
-          <p>Legal checks, documents, permits... here's what to know.</p>
-          <a href="#">Read More</a>
-        </div>
-      </div>
+ <main class="container">
+  <h2>Consulting Articles</h2>
+
+  <!-- Filter Dropdown -->
+  <select id="categoryFilter" style="margin: 1rem 0;">
+    <option value="all">All Categories</option>
+    <option value="Tips">Tips</option>
+    <option value="Construction">Construction</option>
+    <option value="Legal">Legal</option>
+  </select>
+
+  <div class="listings-container" id="blog-list"></div>
+</main>
+
+<!-- Modal -->
+<div id="blog-modal" class="modal">
+  <div class="modal-content">
+    <span id="modal-close" class="modal-close">&times;</span>
+    <h3 id="modal-title"></h3>
+    <p id="modal-body"></p>
+  </div>
+</div>
+
 
       <div class="property-card">
         <img src="https://source.unsplash.com/400x300/?construction,workers" alt="Article 2" />
