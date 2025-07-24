@@ -246,4 +246,33 @@ footer {
   height: 32px;
   filter: invert(1);
 }
+.social-float {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+}
+
+.social-float a {
+  background: white;
+  padding: 8px;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-float img {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.3s;
+}
+
+.social-float a:hover img {
+  transform: scale(1.2);
+}
 
