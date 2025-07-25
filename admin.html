@@ -93,15 +93,18 @@
     document.getElementById('logout-btn').onclick = () => auth.signOut();
 
     auth.onAuthStateChanged(user => {
-      if (user) {
-        loginView.classList.add('hidden');
-        adminView.classList.remove('hidden');
-        loadAllData();
-      } else {
-        adminView.classList.add('hidden');
-        loginView.classList.remove('hidden');
-      }
-    });
+  console.log("Auth state changed:", user);
+  if (user) {
+    console.log("✅ Logged in as", user.email);
+    loginView.classList.add('hidden');
+    adminView.classList.remove('hidden');
+    loadAllData();
+  } else {
+    console.log("🔒 Not logged in");
+    adminView.classList.add('hidden');
+    loginView.classList.remove('hidden');
+  }
+});
 
     // Load data
     function loadAllData() {
