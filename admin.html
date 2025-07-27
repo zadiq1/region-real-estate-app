@@ -3,21 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Firebase Login Test</title>
+  <title>Admin Dashboard | DreamSpace</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 800px; margin: auto; }
+    h2, h3 { margin-top: 1.5rem; }
+    input, textarea, button { display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; }
+    .item { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .item button { width: auto; }
+    .hidden { display: none; }
+    .form-group { margin-bottom: 1rem; border: 1px solid #ddd; padding: 1rem; border-radius: 5px; }
+  </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <h2>Test Firebase Login</h2>
-  <input id="email" type="email" placeholder="Email"><br>
-  <input id="password" type="password" placeholder="Password"><br>
-  <button id="login">Login</button>
+  <!-- ======= LOGIN VIEW ======= -->
+  <div id="login-view">
+    <h2>Admin Login</h2>
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button id="login-btn">Login</button>
+    <p id="login-error" style="color:red;"></p>
+  </div>
 
-  <p id="status"></p>
+  <!-- ======= ADMIN DASHBOARD ======= -->
+  <div id="admin-dashboard" class="hidden">
+    <h2>Welcome, Admin</h2>
+    <button id="logout-btn">Logout</button>
+
+    <h3>Listings Manager</h3>
+    <button id="add-listing-btn">Add New Listing</button>
+    <div id="listings-control"></div>
+
+    <div id="listing-form" class="hidden form-group">
+      <h4 id="listing-form-title">Add Listing</h4>
+      <input id="listing-title" placeholder="Title" />
+      <input id="listing-type" placeholder="Type (house/land/etc.)" />
+      <input id="listing-status" placeholder="Status (sale/rent)" />
+      <input id="listing-price" type="number" placeholder="Price" />
+      <input id="listing-image" placeholder="Image URL" />
+      <textarea id="listing-desc" placeholder="Description"></textarea>
+      <button id="save-listing-btn">Save Listing</button>
+      <button id="cancel-listing-btn">Cancel</button>
+    </div>
+
+    <h3>Blog Posts Manager</h3>
+    <button id="add-blog-btn">Add New Blog</button>
+    <div id="blogs-control"></div>
+
+    <div id="blog-form" class="hidden form-group">
+      <h4 id="blog-form-title">Add Blog</h4>
+      <input id="blog-title" placeholder="Title" />
+      <input id="blog-category" placeholder="Category (Tips/Construction/Legal)" />
+      <input id="blog-image" placeholder="Image URL" />
+      <textarea id="blog-intro" placeholder="Intro text"></textarea>
+      <textarea id="blog-content" placeholder="Full content"></textarea>
+      <button id="save-blog-btn">Save Blog</button>
+      <button id="cancel-blog-btn">Cancel</button>
+    </div>
+  </div>
 
   <script>
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
+    // ======== PASTE YOUR FIREBASE CONFIG HERE ========
+    const firebaseConfig = {
   apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
   authDomain: "dreamspace-8f29c.firebaseapp.com",
   projectId: "dreamspace-8f29c",
@@ -26,23 +75,131 @@ const firebaseConfig = {
   appId: "1:828857686522:web:35af98d58532393029ac43",
   measurementId: "G-VQE70BBCFM"
 };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    document.getElementById("login").onclick = () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then(user => {
-          console.log("✅ Login successful:", user.user.email);
-          document.getElementById("status").textContent = "✅ Login successful!";
-        })
-        .catch(error => {
-          console.error("❌ Login error:", error.message);
-          document.getElementById("status").textContent = "❌ " + error.message;
-        });
+    // UI References
+    const loginView = document.getElementById('login-view');
+    const adminView = document.getElementById('admin-dashboard');
+    const loginError = document.getElementById('login-error');
+    const listingsControl = document.getElementById('listings-control');
+    const blogsControl = document.getElementById('blogs-control');
+    const listingForm = document.getElementById('listing-form');
+    const blogForm = document.getElementById('blog-form');
+    let editListingId = null, editBlogId = null;
+
+    // ======== Authentication ========
+    document.getElementById('login-btn').onclick = () => {
+      auth.signInWithEmailAndPassword(
+        document.getElementById('email').value,
+        document.getElementById('password').value
+      ).catch(e => loginError.textContent = e.message);
     };
+    document.getElementById('logout-btn').onclick = () => auth.signOut();
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        loadAllData();
+      } else {
+        adminView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+      }
+    });
+
+    function loadAllData() {
+      loadListings();
+      loadBlogs();
+    }
+
+    // ======== LISTINGS ========
+    function loadListings() {
+      listingsControl.innerHTML = '';
+      db.collection('listings').get().then(sn => {
+        sn.forEach(doc => {
+          const d = doc.data();
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.innerHTML = `
+            <span>${d.title}</span>
+            <span>
+              <button onclick="editListing('${doc.id}')">Edit</button>
+              <button onclick="deleteListing('${doc.id}')">Delete</button>
+            </span>`;
+          listingsControl.appendChild(div);
+        });
+      });
+    }
+
+    document.getElementById('add-listing-btn').onclick = () => openListingForm();
+    function openListingForm(docId, data) {
+      editListingId = docId || null;
+      listingForm.classList.remove('hidden');
+      document.getElementById('listing-form-title').textContent = docId ? 'Edit Listing' : 'Add Listing';
+      const fields = ['listing-title','listing-type','listing-status','listing-price','listing-image','listing-desc'];
+      fields.forEach(el => document.getElementById(el).value = data?.[el.split('-')[1]] || '');
+    }
+    document.getElementById('cancel-listing-btn').onclick = () => listingForm.classList.add('hidden');
+    document.getElementById('save-listing-btn').onclick = () => {
+      const payload = {
+        title: document.getElementById('listing-title').value,
+        type: document.getElementById('listing-type').value,
+        status: document.getElementById('listing-status').value,
+        price: parseFloat(document.getElementById('listing-price').value) || 0,
+        image: document.getElementById('listing-image').value,
+        desc: document.getElementById('listing-desc').value
+      };
+      const col = db.collection('listings');
+      (editListingId ? col.doc(editListingId).update(payload) : col.add(payload))
+        .then(() => { listingForm.classList.add('hidden'); loadListings(); });
+    };
+    window.editListing = id => { db.collection('listings').doc(id).get().then(doc => openListingForm(id, doc.data())); };
+    window.deleteListing = id => { if (confirm('Delete this listing?')) db.collection('listings').doc(id).delete().then(loadListings); };
+
+    // ======== BLOG POSTS ========
+    function loadBlogs() {
+      blogsControl.innerHTML = '';
+      db.collection('blogs').get().then(sn => {
+        sn.forEach(doc => {
+          const d = doc.data();
+          const div = document.createElement('div');
+          div.className = 'item';
+          div.innerHTML = `
+            <span>${d.title}</span>
+            <span>
+              <button onclick="editBlog('${doc.id}')">Edit</button>
+              <button onclick="deleteBlog('${doc.id}')">Delete</button>
+            </span>`;
+          blogsControl.appendChild(div);
+        });
+      });
+    }
+
+    document.getElementById('add-blog-btn').onclick = () => openBlogForm();
+    function openBlogForm(docId, data) {
+      editBlogId = docId || null;
+      blogForm.classList.remove('hidden');
+      document.getElementById('blog-form-title').textContent = docId ? 'Edit Blog' : 'Add Blog';
+      const fields = ['blog-title','blog-category','blog-image','blog-intro','blog-content'];
+      fields.forEach(el => document.getElementById(el).value = data?.[el.split('-')[1]] || '');
+    }
+    document.getElementById('cancel-blog-btn').onclick = () => blogForm.classList.add('hidden');
+    document.getElementById('save-blog-btn').onclick = () => {
+      const payload = {
+        title: document.getElementById('blog-title').value,
+        category: document.getElementById('blog-category').value,
+        image: document.getElementById('blog-image').value,
+        intro: document.getElementById('blog-intro').value,
+        content: document.getElementById('blog-content').value
+      };
+      const col = db.collection('blogs');
+      (editBlogId ? col.doc(editBlogId).update(payload) : col.add(payload))
+        .then(() => { blogForm.classList.add('hidden'); loadBlogs(); });
+    };
+    window.editBlog = id => { db.collection('blogs').doc(id).get().then(doc => openBlogForm(id, doc.data())); };
+    window.deleteBlog = id => { if (confirm('Delete this blog post?')) db.collection('blogs').doc(id).delete().then(loadBlogs); };
   </script>
 </body>
 </html>
