@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Firebase Login Test</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <h2>Test Firebase Login</h2>
+  <input id="email" type="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button id="login">Login</button>
+
+  <p id="status"></p>
+
+  <script>
+    // 🔧 Paste your Firebase config here
+   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
+  authDomain: "dreamspace-8f29c.firebaseapp.com",
+  projectId: "dreamspace-8f29c",
+  storageBucket: "dreamspace-8f29c.firebasestorage.app",
+  messagingSenderId: "828857686522",
+  appId: "1:828857686522:web:35af98d58532393029ac43",
+  measurementId: "G-VQE70BBCFM"
+};
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    document.getElementById("login").onclick = () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(user => {
+          console.log("✅ Login successful:", user.user.email);
+          document.getElementById("status").textContent = "✅ Login successful!";
+        })
+        .catch(error => {
+          console.error("❌ Login error:", error.message);
+          document.getElementById("status").textContent = "❌ " + error.message;
+        });
+    };
+  </script>
+</body>
+</html>
 
