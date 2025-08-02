@@ -1,48 +1,90 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Contact Us | DreamSpace</title>
   <link rel="stylesheet" href="css/style.css" />
-</head> <!-- Floating WhatsApp Chat -->
-<a href="https://wa.me/+252634546066" class="whatsapp-float" target="_blank" title="Chat on WhatsApp">
-  <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" />
-</a><body>
-  <header>…</header>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1 class="logo">DreamSpace</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="listings.html">Properties</a></li>
+          <li><a href="consulting.html">Consulting</a></li>
+          <li><a href="contact.html" class="active">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
   <main class="container">
-    <h2>Get in Touch</h2>
-    <form id="contact-form" style="…">
-      <input name="user_name" type="text" placeholder="Full Name" required />
-      <input name="user_email" type="email" placeholder="Email Address" required />
-      <input name="subject" type="text" placeholder="Subject" required />
-      <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
-      <button type="submit" class="cta-button">Send Message</button>
-    </form>
-    <p id="contact-message" style="display:none; margin-top:1rem;"></p>
+    <h2>Contact Us</h2>
+    <p>Fill out the form below and we will get back to you shortly.</p>
 
-    <div style="text-align:center; margin-top:2rem;">
-      <p><strong>Prefer Chat?</strong></p>
-      <a href="tel:+1234567890">📞 +1 (234) 567‑890</a><br>
-      <a href="https://wa.me/1234567890" target="_blank">💬 Chat on WhatsApp</a>
-    </div>
+    <form id="contactForm" style="max-width: 500px;">
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" required>
+
+      <label for="phone">Phone Number:</label>
+      <input type="tel" id="phone">
+
+      <label for="message">Message:</label>
+      <textarea id="message" rows="5" required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+
+    <p id="formStatus" style="margin-top:1rem;"></p>
   </main>
 
-  <footer>…</footer>
+  <footer>
+    <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
+  </footer>
 
-  <script src="https://cdn.emailjs.com/sdk/2.3.2/email.min.js"></script>
   <script>
-    emailjs.init("YOUR_EMAILJS_USER_ID");
-    document.getElementById("contact-form").addEventListener("submit", function(e) {
+    // 🔧 Firebase setup
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Form submission
+    const form = document.getElementById("contactForm");
+    const statusMsg = document.getElementById("formStatus");
+
+    form.addEventListener("submit", e => {
       e.preventDefault();
-      emailjs.sendForm("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", this)
+
+      const contactData = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        message: document.getElementById("message").value,
+        createdAt: new Date()
+      };
+
+      db.collection("contacts").add(contactData)
         .then(() => {
-          document.getElementById("contact-message").textContent = "✅ Message sent!";
-          document.getElementById("contact-message").style.color = "green";
-          this.reset();
-        }, () => {
-          document.getElementById("contact-message").textContent = "❌ Failed to send.";
-          document.getElementById("contact-message").style.color = "red";
+          statusMsg.textContent = "✅ Message sent successfully!";
+          form.reset();
+        })
+        .catch(err => {
+          console.error("Error:", err);
+          statusMsg.textContent = "❌ Failed to send message.";
         });
     });
   </script>
-</body></html>
+</body>
+</html>
