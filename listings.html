@@ -87,17 +87,18 @@
       }
 
       list.forEach(d => {
-        listingsContainer.innerHTML += `
-          <div class="property-card">
-            <img src="${d.image}" alt="${d.title}" />
-            <div class="property-card-content">
-              <h3>${d.title}</h3>
-              <p>${d.desc}</p>
-              <strong>$${d.price.toLocaleString()}</strong><br><br>
-              <a href="#">View Details</a>
-            </div>
-          </div>
-        `;
+listingsContainer.innerHTML += `
+  <div class="property-card">
+    <img src="${d.image}" alt="${d.title}" />
+    <div class="property-card-content">
+      <h3>${d.title}</h3>
+      <p>${d.desc}</p>
+      <strong>$${d.price.toLocaleString()}</strong><br><br>
+      <a href="property.html?id=${d.id}">View Details</a>
+    </div>
+  </div>
+`;
+
       });
     }
 
