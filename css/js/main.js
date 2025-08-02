@@ -161,3 +161,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+function loadContacts() {
+  const cc = document.getElementById('contacts-control');
+  cc.innerHTML = '';
+  db.collection('contacts').orderBy('createdAt','desc').get().then(sn => {
+    sn.forEach(doc => {
+      const d = doc.data();
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `<strong>${d.name}</strong> (${d.email}, ${d.phone || 'N/A'})<br>
+                       <small>${d.message}</small>`;
+      cc.appendChild(div);
+    });
+  });
+}
+
+// Call in loadAllData()
+function loadAllData() {
+  loadListings();
+  loadBlogs();
+  loadContacts();
+}
