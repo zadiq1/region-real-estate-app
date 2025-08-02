@@ -12,15 +12,33 @@
 </a>
 <body>
   <header>
-    <div class="container" style="display:flex; justify-content:space-between; align-items:center;">
-      <h1 class="logo">DreamSpace</h1>
-      <nav>
-        <ul style="list-style:none; display:flex; gap:1rem;">
-          <li><a href="index.html">Home</a></li>
-          <li><a href="listings.html">Listings</a></li>
-          <li><a href="store.html" class="active">Store</a></li>
-        </ul>
-      </nav>
+    <main class="container">
+  <h2>Materials Store</h2>
+
+  <div class="store-items">
+    <!-- Example item -->
+    <div class="property-card">
+      <img src="https://source.unsplash.com/400x300/?cement" alt="Cement Bag" />
+      <div class="property-card-content">
+        <h3>Cement Bag</h3>
+        <p>50kg high-quality cement bag</p>
+        <strong>$10</strong><br><br>
+        <button class="add-to-cart">Add to Cart</button>
+      </div>
+    </div>
+    <!-- Add more items dynamically or manually -->
+  </div>
+
+  <!-- Sidebar Cart -->
+  <div id="cart-sidebar" class="cart-sidebar">
+    <h3>Your Cart</h3>
+    <ul id="cart-items"></ul>
+    <button id="cart-close">Close</button>
+    <button id="checkout-btn">Checkout</button>
+    <p id="order-status"></p>
+  </div>
+</main>
+
       <div class="cart-ui">
         🛒 <span id="cart-count">0</span> items
         <button id="cart-toggle">View Cart</button>
