@@ -1,5 +1,20 @@
+// Initialize Firebase (Ensure scripts are loaded in HTML)
+const firebaseConfig = {
+  apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
+  authDomain: "dreamspace-8f29c.firebaseapp.com",
+  projectId: "dreamspace-8f29c",
+  storageBucket: "dreamspace-8f29c.firebasestorage.app",
+  messagingSenderId: "828857686522",
+  appId: "1:828857686522:web:35af98d58532393029ac43",
+  measurementId: "G-VQE70BBCFM"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("🚀 DreamSpace System Loaded");
+  console.log("🚀 DreamSpace Main JS Loaded");
 
   // ========= LISTINGS FILTER ========= //
   const typeSelect = document.getElementById("type");
@@ -9,14 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const cards = document.querySelectorAll(".property-card");
 
   function filterListings() {
-    const selectedType = typeSelect?.value || "all";
-    const selectedStatus = statusSelect?.value || "all";
+    const selectedType = typeSelect?.value.toLowerCase() || "all";
+    const selectedStatus = statusSelect?.value.toLowerCase() || "all";
     const minPrice = parseFloat(minPriceInput?.value) || 0;
     const maxPrice = parseFloat(maxPriceInput?.value) || Infinity;
 
     cards.forEach(card => {
-      const type = card.getAttribute("data-type");
-      const status = card.getAttribute("data-status");
+      const type = card.getAttribute("data-type")?.toLowerCase();
+      const status = card.getAttribute("data-status")?.toLowerCase();
       const price = parseFloat(card.getAttribute("data-price")) || 0;
 
       const matchType = selectedType === "all" || selectedType === type;
@@ -45,9 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const cartToggle = document.getElementById("cart-toggle");
   const cartSidebar = document.getElementById("cart-sidebar");
   const cartClose = document.getElementById("cart-close");
+  const checkoutBtn = document.getElementById('checkout-btn');
+  const orderStatus = document.getElementById('order-status');
+
   const cart = {};
 
   function updateCartUI() {
+    if (!cartItemsList || !cartCount) return;
     cartItemsList.innerHTML = "";
     let total = 0;
 
@@ -74,7 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  document.querySelectorAll(".property-card a").forEach(btn => {
+  // Add to cart
+  document.querySelectorAll(".property-card a, .add-to-cart").forEach(btn => {
     btn.addEventListener("click", e => {
       e.preventDefault();
       const card = e.target.closest(".property-card");
@@ -87,14 +107,36 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   cartToggle?.addEventListener("click", () => {
-    cartSidebar.style.right = "0";
+    if (cartSidebar) cartSidebar.style.right = "0";
   });
-
   cartClose?.addEventListener("click", () => {
-    cartSidebar.style.right = "-100%";
+    if (cartSidebar) cartSidebar.style.right = "-100%";
   });
-
   updateCartUI();
+
+  // ========= FIRESTORE ORDER SUBMIT ========= //
+  checkoutBtn?.addEventListener('click', () => {
+    if (Object.keys(cart).length === 0) {
+      if (orderStatus) orderStatus.textContent = '❌ Cart is empty!';
+      return;
+    }
+
+    const order = {
+      items: Object.entries(cart).map(([name, qty]) => ({ name, qty })),
+      createdAt: new Date(),
+    };
+
+    db.collection('orders').add(order)
+      .then(() => {
+        if (orderStatus) orderStatus.textContent = '✅ Order submitted successfully!';
+        for (let key in cart) delete cart[key];
+        updateCartUI();
+      })
+      .catch(err => {
+        console.error(err);
+        if (orderStatus) orderStatus.textContent = '❌ Failed to submit order.';
+      });
+  });
 
   // ========= BLOG / CONSULTING ARTICLES ========= //
   const blogList = document.getElementById("blog-list");
@@ -107,16 +149,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let articles = [];
 
   if (blogList) {
-    fetch("data/articles.json")
-      .then(res => res.json())
-      .then(data => {
-        articles = data;
-        renderArticles("all");
-      });
+    db.collection("blogs").get().then(sn => {
+      articles = sn.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderArticles("all");
+    });
 
     categoryFilter?.addEventListener("change", () => {
-      const cat = categoryFilter.value;
-      renderArticles(cat);
+      renderArticles(categoryFilter.value);
     });
 
     function renderArticles(category) {
@@ -132,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="property-card-content">
             <h3>${article.title}</h3>
             <p>${article.intro}</p>
-            <a href="#" class="read-more" data-title="${article.title}">Read More</a>
+            <a href="#" class="read-more" data-id="${article.id}">Read More</a>
           </div>
         `;
         blogList.appendChild(div);
@@ -141,44 +180,20 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".read-more").forEach(link => {
         link.addEventListener("click", e => {
           e.preventDefault();
-          const title = link.getAttribute("data-title");
-          const article = articles.find(a => a.title === title);
+          const id = link.dataset.id;
+          const article = articles.find(a => a.id === id);
           modalTitle.textContent = article.title;
           modalBody.textContent = article.content;
-          modal.style.display = "block";
+          if (modal) modal.style.display = "block";
         });
       });
     }
 
     modalClose?.addEventListener("click", () => {
-      modal.style.display = "none";
+      if (modal) modal.style.display = "none";
     });
-
     window.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
+      if (modal && e.target === modal) modal.style.display = "none";
     });
   }
 });
-function loadContacts() {
-  const cc = document.getElementById('contacts-control');
-  cc.innerHTML = '';
-  db.collection('contacts').orderBy('createdAt','desc').get().then(sn => {
-    sn.forEach(doc => {
-      const d = doc.data();
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `<strong>${d.name}</strong> (${d.email}, ${d.phone || 'N/A'})<br>
-                       <small>${d.message}</small>`;
-      cc.appendChild(div);
-    });
-  });
-}
-
-// Call in loadAllData()
-function loadAllData() {
-  loadListings();
-  loadBlogs();
-  loadContacts();
-}
