@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Property Details | DreamSpace</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1 class="logo">DreamSpace</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="listings.html">Properties</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="property-details">
+      <h2>Loading property...</h2>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // 🔧 Firebase setup
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Get property ID from URL
+    const params = new URLSearchParams(window.location.search);
+    const propertyId = params.get('id');
+    const detailsContainer = document.getElementById('property-details');
+
+    if (propertyId) {
+      db.collection('listings').doc(propertyId).get().then(doc => {
+        if (doc.exists) {
+          const d = doc.data();
+          detailsContainer.innerHTML = `
+            <div class="property-detail-card">
+              <img src="${d.image}" alt="${d.title}" style="max-width:100%; border-radius: 8px;"/>
+              <h2>${d.title}</h2>
+              <p><strong>Type:</strong> ${d.type} | <strong>Status:</strong> ${d.status}</p>
+              <p><strong>Price:</strong> $${d.price.toLocaleString()}</p>
+              <p>${d.desc}</p>
+              <button onclick="window.location.href='contact.html'">Contact Us</button>
+            </div>
+          `;
+        } else {
+          detailsContainer.innerHTML = "<p>❌ Property not found.</p>";
+        }
+      }).catch(err => {
+        console.error(err);
+        detailsContainer.innerHTML = "<p>❌ Failed to load property details.</p>";
+      });
+    } else {
+      detailsContainer.innerHTML = "<p>❌ No property selected.</p>";
+    }
+  </script>
+</body>
+</html>
