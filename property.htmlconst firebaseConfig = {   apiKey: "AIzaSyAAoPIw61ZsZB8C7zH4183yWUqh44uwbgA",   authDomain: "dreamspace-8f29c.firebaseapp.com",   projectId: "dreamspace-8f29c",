@@ -13,13 +13,32 @@
   <style>
     .property-detail-card { margin: 2rem 0; }
     .gallery { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 1rem; }
-    .gallery img { width: 200px; height: 150px; object-fit: cover; border-radius: 6px; cursor: pointer; }
-    .gallery img:hover { opacity: 0.8; }
+    .gallery img { width: 200px; height: 150px; object-fit: cover; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+    .gallery img:hover { opacity: 0.8; transform: scale(1.05); }
+
     .similar-container { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 2rem; }
     .property-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; }
     .property-card-content { padding: 0.5rem 0; }
+
     button.contact-btn { margin-top: 1rem; padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button.contact-btn:hover { background: #0056b3; }
+
+    /* Lightbox */
+    .lightbox {
+      display: none; position: fixed; z-index: 10000;
+      left: 0; top: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); align-items: center; justify-content: center;
+    }
+    .lightbox img {
+      max-width: 90%; max-height: 80%; border-radius: 10px;
+    }
+    .lightbox .close, .lightbox .prev, .lightbox .next {
+      position: absolute; color: white; font-size: 2rem; cursor: pointer; padding: 10px;
+      background: rgba(0,0,0,0.5); border-radius: 50%;
+    }
+    .lightbox .close { top: 20px; right: 30px; }
+    .lightbox .prev { left: 30px; top: 50%; transform: translateY(-50%); }
+    .lightbox .next { right: 30px; top: 50%; transform: translateY(-50%); }
   </style>
 </head>
 <body>
@@ -47,6 +66,14 @@
     <div class="similar-container" id="similar-listings"></div>
   </main>
 
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="close" id="lightbox-close">&times;</span>
+    <span class="prev" id="lightbox-prev">&#10094;</span>
+    <img id="lightbox-img" src="" alt="Property Image" />
+    <span class="next" id="lightbox-next">&#10095;</span>
+  </div>
+
   <!-- FOOTER -->
   <footer>
     <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
@@ -62,13 +89,35 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // DOM elements
     const detailsContainer = document.getElementById('property-details');
     const similarContainer = document.getElementById('similar-listings');
 
-    // Get property ID from URL
     const params = new URLSearchParams(window.location.search);
     const propertyId = params.get('id');
+
+    // Lightbox Elements
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+    let galleryImages = [];
+    let currentIndex = 0;
+
+    function openLightbox(index) {
+      currentIndex = index;
+      lightboxImg.src = galleryImages[currentIndex];
+      lightbox.style.display = 'flex';
+    }
+
+    function closeLightbox() { lightbox.style.display = 'none'; }
+    function nextImage() { currentIndex = (currentIndex + 1) % galleryImages.length; openLightbox(currentIndex); }
+    function prevImage() { currentIndex = (currentIndex - 1 + galleryImages.length) % galleryImages.length; openLightbox(currentIndex); }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxNext.addEventListener('click', nextImage);
+    lightboxPrev.addEventListener('click', prevImage);
+    window.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
 
     if (!propertyId) {
       detailsContainer.innerHTML = "<p>❌ No property selected.</p>";
@@ -80,15 +129,14 @@
         }
 
         const d = doc.data();
+        galleryImages = d.gallery && d.gallery.length > 0 ? d.gallery : [d.image];
 
-        // ---- Property Details with Gallery ----
-        const galleryHTML = d.gallery && d.gallery.length > 0
-          ? `<div class="gallery">${d.gallery.map(img => `<img src="${img}" alt="${d.title}" />`).join('')}</div>`
-          : `<img src="${d.image}" alt="${d.title}" style="max-width:100%; border-radius: 8px;"/>`;
+        // Gallery HTML
+        const galleryHTML = galleryImages.map((img, i) => `<img src="${img}" data-index="${i}" alt="${d.title}" />`).join('');
 
         detailsContainer.innerHTML = `
           <div class="property-detail-card">
-            ${galleryHTML}
+            <div class="gallery">${galleryHTML}</div>
             <h2>${d.title}</h2>
             <p><strong>Type:</strong> ${d.type} | <strong>Status:</strong> ${d.status}</p>
             <p><strong>Price:</strong> $${d.price.toLocaleString()}</p>
@@ -97,7 +145,14 @@
           </div>
         `;
 
-        // ---- Load Similar Listings (same type) ----
+        // Add gallery click events
+        document.querySelectorAll('.gallery img').forEach(img => {
+          img.addEventListener('click', e => {
+            openLightbox(parseInt(e.target.dataset.index));
+          });
+        });
+
+        // ---- Load Similar Listings ----
         db.collection('listings').where('type', '==', d.type).get().then(snapshot => {
           let html = '';
           snapshot.forEach(similarDoc => {
