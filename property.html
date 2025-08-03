@@ -5,10 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Property Details | DreamSpace</title>
   <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    .property-detail-card { margin: 2rem 0; }
+    .gallery { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 1rem; }
+    .gallery img { width: 200px; height: 150px; object-fit: cover; border-radius: 6px; cursor: pointer; }
+    .gallery img:hover { opacity: 0.8; }
+    .similar-container { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 2rem; }
+    .property-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; }
+    .property-card-content { padding: 0.5rem 0; }
+    button.contact-btn { margin-top: 1rem; padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button.contact-btn:hover { background: #0056b3; }
+  </style>
 </head>
 <body>
+  <!-- HEADER -->
   <header>
     <div class="container">
       <h1 class="logo">DreamSpace</h1>
@@ -22,12 +37,17 @@
     </div>
   </header>
 
+  <!-- MAIN -->
   <main class="container">
     <div id="property-details">
       <h2>Loading property...</h2>
     </div>
+
+    <h3 style="margin-top: 3rem;">Similar Listings</h3>
+    <div class="similar-container" id="similar-listings"></div>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
   </footer>
@@ -35,41 +55,74 @@
   <script>
     // 🔧 Firebase setup
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID"
+       apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
+  authDomain: "dreamspace-8f29c.firebaseapp.com",
+  projectId: "dreamspace-8f29c",
+  
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // DOM elements
+    const detailsContainer = document.getElementById('property-details');
+    const similarContainer = document.getElementById('similar-listings');
+
     // Get property ID from URL
     const params = new URLSearchParams(window.location.search);
     const propertyId = params.get('id');
-    const detailsContainer = document.getElementById('property-details');
 
-    if (propertyId) {
+    if (!propertyId) {
+      detailsContainer.innerHTML = "<p>❌ No property selected.</p>";
+    } else {
       db.collection('listings').doc(propertyId).get().then(doc => {
-        if (doc.exists) {
-          const d = doc.data();
-          detailsContainer.innerHTML = `
-            <div class="property-detail-card">
-              <img src="${d.image}" alt="${d.title}" style="max-width:100%; border-radius: 8px;"/>
-              <h2>${d.title}</h2>
-              <p><strong>Type:</strong> ${d.type} | <strong>Status:</strong> ${d.status}</p>
-              <p><strong>Price:</strong> $${d.price.toLocaleString()}</p>
-              <p>${d.desc}</p>
-              <button onclick="window.location.href='contact.html'">Contact Us</button>
-            </div>
-          `;
-        } else {
+        if (!doc.exists) {
           detailsContainer.innerHTML = "<p>❌ Property not found.</p>";
+          return;
         }
+
+        const d = doc.data();
+
+        // ---- Property Details with Gallery ----
+        const galleryHTML = d.gallery && d.gallery.length > 0
+          ? `<div class="gallery">${d.gallery.map(img => `<img src="${img}" alt="${d.title}" />`).join('')}</div>`
+          : `<img src="${d.image}" alt="${d.title}" style="max-width:100%; border-radius: 8px;"/>`;
+
+        detailsContainer.innerHTML = `
+          <div class="property-detail-card">
+            ${galleryHTML}
+            <h2>${d.title}</h2>
+            <p><strong>Type:</strong> ${d.type} | <strong>Status:</strong> ${d.status}</p>
+            <p><strong>Price:</strong> $${d.price.toLocaleString()}</p>
+            <p>${d.desc}</p>
+            <button class="contact-btn" onclick="window.location.href='contact.html'">Contact Us</button>
+          </div>
+        `;
+
+        // ---- Load Similar Listings (same type) ----
+        db.collection('listings').where('type', '==', d.type).get().then(snapshot => {
+          let html = '';
+          snapshot.forEach(similarDoc => {
+            if (similarDoc.id !== propertyId) {
+              const sim = similarDoc.data();
+              html += `
+                <div class="property-card">
+                  <img src="${sim.image}" alt="${sim.title}" />
+                  <div class="property-card-content">
+                    <h3>${sim.title}</h3>
+                    <p>${sim.desc}</p>
+                    <strong>$${sim.price.toLocaleString()}</strong><br><br>
+                    <a href="property.html?id=${similarDoc.id}">View Details</a>
+                  </div>
+                </div>
+              `;
+            }
+          });
+          similarContainer.innerHTML = html || "<p>No similar listings found.</p>";
+        });
       }).catch(err => {
         console.error(err);
         detailsContainer.innerHTML = "<p>❌ Failed to load property details.</p>";
       });
-    } else {
-      detailsContainer.innerHTML = "<p>❌ No property selected.</p>";
     }
   </script>
 </body>
