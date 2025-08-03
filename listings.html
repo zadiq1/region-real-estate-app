@@ -1,11 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Property Listings | DreamSpace Real Estate</title>
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
 <body>
+  <!-- HEADER -->
   <header>
     <div class="container">
       <h1 class="logo">Region</h1>
       <nav>
         <ul>
           <li><a href="index.html">Home</a></li>
-          <li><a href="listings.html">Properties</a></li>
+          <li><a href="listings.html" class="active">Properties</a></li>
           <li><a href="construction.html">Construction</a></li>
           <li><a href="management.html">Management</a></li>
           <li><a href="store.html">Materials Store</a></li>
@@ -17,9 +30,11 @@
     </div>
   </header>
 
+  <!-- MAIN -->
   <main class="container">
     <h2 style="margin: 2rem 0;">Browse Properties</h2>
 
+    <!-- Filters -->
     <div style="margin-bottom: 2rem;">
       <label for="type">Type:</label>
       <select id="type">
@@ -46,67 +61,67 @@
       <button onclick="applyFilters()">Apply Filters</button>
     </div>
 
+    <!-- Property Listings -->
     <div class="listings-container" id="listings"></div>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
   </footer>
 
-  <!-- WhatsApp -->
-  <a href="https://wa.me/+252634546066" class="whatsapp-float" target="_blank" title="Chat on WhatsApp">
-    <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" />
-  </a>
-
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script>
-    cconst firebaseConfig = {
-  apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
-  authDomain: "dreamspace-8f29c.firebaseapp.com",
-  projectId: "dreamspace-8f29c",
-  storageBucket: "dreamspace-8f29c.firebasestorage.app",
-  messagingSenderId: "828857686522",
-  appId: "1:828857686522:web:35af98d58532393029ac43",
-  measurementId: "G-VQE70BBCFM"
-};
-
+    // 🔧 Firebase setup
+    const firebaseConfig = {
+      apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
+      authDomain: "dreamspace-8f29c.firebaseapp.com",
+      projectId: "dreamspace-8f29c"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    const listingsContainer = document.getElementById('listings');
     let allListings = [];
 
-    const listingsContainer = document.getElementById('listings');
+    // Load listings
+    db.collection("listings").get().then(snapshot => {
+      if (snapshot.empty) {
+        listingsContainer.innerHTML = "<p>No properties available.</p>";
+        return;
+      }
+
+      allListings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderListings(allListings);
+    });
 
     function renderListings(list) {
-      listingsContainer.innerHTML = '';
+      listingsContainer.innerHTML = "";
       if (list.length === 0) {
-        listingsContainer.innerHTML = '<p>No matching listings found.</p>';
+        listingsContainer.innerHTML = "<p>No matching properties found.</p>";
         return;
       }
 
       list.forEach(d => {
-listingsContainer.innerHTML += `
-  <div class="property-card">
-    <img src="${d.image}" alt="${d.title}" />
-    <div class="property-card-content">
-      <h3>${d.title}</h3>
-      <p>${d.desc}</p>
-      <strong>$${d.price.toLocaleString()}</strong><br><br>
-      <a href="property.html?id=${d.id}">View Details</a>
-    </div>
-  </div>
-`;
-
+        listingsContainer.innerHTML += `
+          <div class="property-card" data-type="${d.type}" data-status="${d.status}" data-price="${d.price}">
+            <img src="${d.image}" alt="${d.title}" />
+            <div class="property-card-content">
+              <h3>${d.title}</h3>
+              <p>${d.desc}</p>
+              <strong>$${d.price.toLocaleString()}</strong><br><br>
+              <a href="property.html?id=${d.id}">View Details</a>
+            </div>
+          </div>
+        `;
       });
     }
 
+    // Filter logic
     function applyFilters() {
       const type = document.getElementById('type').value.toLowerCase();
       const status = document.getElementById('status').value.toLowerCase();
       const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
-      const maxPrice = parseFloat(document.getElementById('maxPrice').value) || 999999999;
+      const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
 
       const filtered = allListings.filter(p => {
         return (
@@ -118,11 +133,6 @@ listingsContainer.innerHTML += `
 
       renderListings(filtered);
     }
-
-    // Load listings from Firestore
-    db.collection("listings").get().then(snapshot => {
-      allListings = snapshot.docs.map(doc => doc.data());
-      renderListings(allListings);
-    });
   </script>
 </body>
+</html>
