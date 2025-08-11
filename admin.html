@@ -50,6 +50,28 @@
       <button id="save-listing-btn">Save Listing</button>
       <button id="cancel-listing-btn">Cancel</button>
     </div>
+<h4>Images & Video</h4>
+
+<!-- Featured Image Upload -->
+<label>Featured Image:</label>
+<input type="file" id="listing-featured" accept="image/*">
+<progress id="featured-progress" value="0" max="100" style="width:100%;"></progress>
+
+<!-- Drag & Drop for Gallery -->
+<label>Gallery Images (Drag & Drop or Select):</label>
+<div id="gallery-dropzone" style="border:2px dashed #ccc; padding:1rem; text-align:center; margin-bottom:1rem;">
+  Drag & Drop Images Here
+</div>
+<input type="file" id="listing-gallery-upload" accept="image/*" multiple style="display:none;">
+
+<div id="upload-preview" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+<progress id="gallery-progress" value="0" max="100" style="width:100%;"></progress>
+
+<!-- Video Upload -->
+<label>Video Upload (Optional):</label>
+<input type="file" id="listing-video-upload" accept="video/*">
+<progress id="video-progress" value="0" max="100" style="width:100%;"></progress>
+<video id="video-preview" controls style="width:200px; margin-top:10px; display:none;"></video>
 
     <h3>Blog Posts Manager</h3>
     <button id="add-blog-btn">Add New Blog</button>
