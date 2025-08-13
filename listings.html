@@ -1,20 +1,16 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Property Listings | DreamSpace Real Estate</title>
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" />
 </head>
 <body>
-  <!-- HEADER -->
   <header>
     <div class="container">
-      <h1 class="logo">Region</h1>
+      <h1 class="logo">DreamSpace</h1>
       <nav>
         <ul>
           <li><a href="index.html">Home</a></li>
@@ -30,109 +26,113 @@
     </div>
   </header>
 
-  <!-- MAIN -->
   <main class="container">
-    <h2 style="margin: 2rem 0;">Browse Properties</h2>
+    <h2>Browse Properties</h2>
 
-    <!-- Filters -->
-    <div style="margin-bottom: 2rem;">
+    <div class="filters">
       <label for="type">Type:</label>
       <select id="type">
         <option value="all">All</option>
-        <option value="house">House</option>
-        <option value="land">Land</option>
+        <option value="buy">Buy</option>
+        <option value="rent">Rent</option>
         <option value="apartment">Apartment</option>
-        <option value="commercial">Commercial</option>
-      </select>
-
-      <label for="status">Status:</label>
-      <select id="status">
-        <option value="all">All</option>
-        <option value="sale">For Sale</option>
-        <option value="rent">For Rent</option>
       </select>
 
       <label for="minPrice">Min Price:</label>
-      <input type="number" id="minPrice" placeholder="0" style="width:100px;" />
+      <input type="number" id="minPrice" placeholder="0" />
 
       <label for="maxPrice">Max Price:</label>
-      <input type="number" id="maxPrice" placeholder="1000000" style="width:100px;" />
+      <input type="number" id="maxPrice" placeholder="1000000" />
 
-      <button onclick="applyFilters()">Apply Filters</button>
+      <button id="applyFilters">Apply Filters</button>
     </div>
 
-    <!-- Property Listings -->
-    <div class="listings-container" id="listings"></div>
+    <div class="listings-container" id="listings-container">
+      <p>Loading properties...</p>
+    </div>
   </main>
 
-  <!-- FOOTER -->
   <footer>
     <p>© 2025 DreamSpace Real Estate. All rights reserved.</p>
   </footer>
 
-  <script>
-    // 🔧 Firebase setup
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+    // ✅ Your Firebase Config
     const firebaseConfig = {
-      apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
-      authDomain: "dreamspace-8f29c.firebaseapp.com",
-      projectId: "dreamspace-8f29c"
+  apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
+  authDomain: "dreamspace-8f29c.firebaseapp.com",
+  projectId: "dreamspace-8f29c",
+  storageBucket: "dreamspace-8f29c.firebasestorage.app",
+  messagingSenderId: "828857686522",
+  appId: "1:828857686522:web:35af98d58532393029ac43",
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    const listingsContainer = document.getElementById('listings');
-    let allListings = [];
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    // Load listings
-    db.collection("listings").get().then(snapshot => {
-      if (snapshot.empty) {
-        listingsContainer.innerHTML = "<p>No properties available.</p>";
+    const container = document.getElementById("listings-container");
+    const typeFilter = document.getElementById("type");
+    const minPrice = document.getElementById("minPrice");
+    const maxPrice = document.getElementById("maxPrice");
+    const applyFilters = document.getElementById("applyFilters");
+
+    let properties = [];
+
+    async function loadProperties() {
+      const querySnapshot = await getDocs(collection(db, "listings"));
+      properties = querySnapshot.docs.map(doc => doc.data());
+      renderListings(properties);
+    }
+
+    function renderListings(data) {
+      container.innerHTML = "";
+      if (data.length === 0) {
+        container.innerHTML = "<p>No properties found.</p>";
         return;
       }
-
-      allListings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderListings(allListings);
-    });
-
-    function renderListings(list) {
-      listingsContainer.innerHTML = "";
-      if (list.length === 0) {
-        listingsContainer.innerHTML = "<p>No matching properties found.</p>";
-        return;
-      }
-
-      list.forEach(d => {
-        listingsContainer.innerHTML += `
-          <div class="property-card" data-type="${d.type}" data-status="${d.status}" data-price="${d.price}">
-            <img src="${d.image}" alt="${d.title}" />
-            <div class="property-card-content">
-              <h3>${d.title}</h3>
-              <p>${d.desc}</p>
-              <strong>$${d.price.toLocaleString()}</strong><br><br>
-              <a href="property.html?id=${d.id}">View Details</a>
-            </div>
+      data.forEach(item => {
+        const card = document.createElement("div");
+        card.classList.add("property-card");
+        card.innerHTML = `
+          <a href="${item.image}" data-lightbox="gallery" data-title="${item.title}">
+            <img src="${item.image}" alt="${item.title}">
+          </a>
+          <div class="property-card-content">
+            <h3>${item.title}</h3>
+            <p>${item.description}</p>
+            <strong>$${item.price}</strong>
+            <br><br>
+            <a href="${item.video || '#'}" target="_blank">Watch Video</a>
           </div>
         `;
+        container.appendChild(card);
       });
     }
 
-    // Filter logic
-    function applyFilters() {
-      const type = document.getElementById('type').value.toLowerCase();
-      const status = document.getElementById('status').value.toLowerCase();
-      const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
-      const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+    function applyFilterLogic() {
+      let filtered = properties;
+      const typeVal = typeFilter.value;
+      const minVal = parseFloat(minPrice.value) || 0;
+      const maxVal = parseFloat(maxPrice.value) || Infinity;
 
-      const filtered = allListings.filter(p => {
-        return (
-          (type === 'all' || p.type.toLowerCase() === type) &&
-          (status === 'all' || p.status.toLowerCase() === status) &&
-          p.price >= minPrice && p.price <= maxPrice
-        );
-      });
+      if (typeVal !== "all") {
+        filtered = filtered.filter(p => p.type === typeVal);
+      }
+      filtered = filtered.filter(p => p.price >= minVal && p.price <= maxVal);
 
       renderListings(filtered);
     }
+
+    applyFilters.addEventListener("click", applyFilterLogic);
+
+    loadProperties();
   </script>
+
+  <!-- Lightbox -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 </body>
 </html>
