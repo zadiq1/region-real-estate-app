@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,6 +6,23 @@
   <title>Property Listings | DreamSpace Real Estate</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" />
+  <style>
+    .video-links {
+      margin-top: 10px;
+    }
+    .video-links a {
+      display: inline-block;
+      margin-right: 8px;
+      background: #ff6b00;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+    }
+    .video-links a:hover {
+      background: #e45d00;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -62,7 +79,7 @@
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
 
     // ✅ Your Firebase Config
-    const firebaseConfig = {
+   const firebaseConfig = {
   apiKey: "AIzaSyAAoPIw61ZsZB8C7zH4183yWUqh44uwbgA",
   authDomain: "dreamspace-8f29c.firebaseapp.com",
   projectId: "dreamspace-8f29c",
@@ -97,16 +114,30 @@
       data.forEach(item => {
         const card = document.createElement("div");
         card.classList.add("property-card");
+
+        let imagesHTML = "";
+        if (item.images && item.images.length > 0) {
+          imagesHTML = item.images.map((img, index) => `
+            <a href="${img}" data-lightbox="gallery-${item.title}" data-title="${item.title}">
+              <img src="${img}" alt="${item.title}" style="width:100%; max-height:200px; object-fit:cover;">
+            </a>
+          `).join("");
+        }
+
+        let videosHTML = "";
+        if (item.videos && item.videos.length > 0) {
+          videosHTML = `<div class="video-links">` +
+            item.videos.map((vid, idx) => `<a href="${vid}" target="_blank">Watch Video ${idx+1}</a>`).join("") +
+            `</div>`;
+        }
+
         card.innerHTML = `
-          <a href="${item.image}" data-lightbox="gallery" data-title="${item.title}">
-            <img src="${item.image}" alt="${item.title}">
-          </a>
+          ${imagesHTML}
           <div class="property-card-content">
             <h3>${item.title}</h3>
             <p>${item.description}</p>
             <strong>$${item.price}</strong>
-            <br><br>
-            <a href="${item.video || '#'}" target="_blank">Watch Video</a>
+            ${videosHTML}
           </div>
         `;
         container.appendChild(card);
